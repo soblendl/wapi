@@ -1,0 +1,4 @@
+sessions
+.tsbuildinfo
+pnpm-lock.yaml
+node_modules

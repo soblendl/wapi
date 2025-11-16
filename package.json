@@ -1,0 +1,61 @@
+{
+  "name": "@imjxsx/wapi",
+  "version": "1.0.0-beta",
+  "description": "Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./build/index.js",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "files": [
+    "./build",
+    "./README.md"
+  ],
+  "scripts": {
+    "dev": "tsx ./src/test.ts",
+    "build": "tsc",
+    "prepare": "pnpm run build"
+  },
+  "keywords": [
+    "bot",
+    "whatsapp",
+    "baileys",
+    "lightweight",
+    "typescript",
+    "nodejs",
+    "wapi"
+  ],
+  "author": "imjxsx",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imjxsx/wapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imjxsx/wapi/issues"
+  },
+  "homepage": "https://github.com/imjxsx/wapi#readme",
+  "packageManager": "pnpm@10.20.0",
+  "dependencies": {
+    "@hapi/boom": "10.0.1",
+    "@imjxsx/logger": "1.1.1",
+    "autolinker": "4.1.5",
+    "baileys": "7.0.0-rc.6",
+    "cheerio": "1.1.2",
+    "ioredis": "5.8.2",
+    "long": "5.3.2",
+    "mongodb": "7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.5",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
