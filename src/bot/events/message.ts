@@ -25,7 +25,6 @@ export function message(bot: Bot): void {
               contacts.push(ctx.from);
             }
           }
-          console.dir(ctx, { depth: 10 });
           const middlewares = [
             ...bot.middlewares,
             ...(bot.commands.get(ctx.commandName) ?? []),
