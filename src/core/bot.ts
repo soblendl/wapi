@@ -100,11 +100,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
             const output = new Boom(update.lastDisconnect?.error).output;
             this.emit("close", `${output.payload.error} ${output.payload.statusCode}: ${output.payload.message}`);
             switch (output.payload.statusCode) {
-              case 405:
-              case 404:
-              case 403:
+              case 400:
               case 401:
-              case 400: {
+              case 403:
+              case 404:
+              case 405: {
                 await this.auth.remove();
                 this.ws = null;
                 this.removeAllListeners();
@@ -123,6 +123,12 @@ export class Bot extends EventEmitter<IBotEventMap> {
                 break;
               }
               default: {
+                if (output.payload.message === "Intentional disconnection.") {
+                  this.ws = null;
+                  this.removeAllListeners();
+                  this.status = "close";
+                  break;
+                }
                 await new Promise((resolve) => (setTimeout(resolve, 5_000)));
                 this.status = "reconnecting";
                 await this.login(method);
@@ -233,9 +239,9 @@ export class Bot extends EventEmitter<IBotEventMap> {
       this.emit("error", toError(e));
     }
   }
-  public async disconnect(reason?: Boom): Promise<void> {
+  public async disconnect(reason?: Error): Promise<void> {
     try {
-      reason ??= new Boom("Intentional disconnection.", { statusCode: 204 });
+      reason ??= new Error("Intentional disconnection.");
       this.ws?.end(reason);
     }
     catch (e) {
