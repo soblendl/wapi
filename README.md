@@ -68,7 +68,7 @@ bot.use(async (ctx, next) => {
   bot.logger.info(`New message from '${ctx.from.name}' in '${ctx.chat.name}'`);
   await next();
 });
-// The supported prefixes are '/' and '!'
+// The default prefixes are '/' and '!'
 bot.command("ping", async (ctx) => {
   await ctx.reply(`> ¡Pong! \`\`\`${bot.ping.toFixed(2)} ms\`\`\``);
 });

@@ -13,7 +13,8 @@ export class Context extends Message {
     super(bot, message);
     this.bot = bot;
     if (this.text) {
-      const match = (this.text.match(/^\s*([/!])\s*([a-zA-Z0-9_$>?-]+)(?:\s+(.+))?/i) ?? []).filter(Boolean).map((v) => (v.trim()));
+      const regexp = new RegExp(`^\\s*([${this.bot.prefix}])\\s*([a-zA-Z0-9_$>?-]+)(?:\\s+(.+))?`, "i");
+      const match = (this.text.match(regexp) ?? []).filter(Boolean).map((v) => (v.trim()));
       if (match.length) {
         this.prefixUsed = match[1] ?? "";
         this.commandName = (match[2] ?? "").toLowerCase();

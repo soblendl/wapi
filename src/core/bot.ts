@@ -19,6 +19,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
   public status: BotStatus = "close";
   public logger: Logger;
   public ping = 0;
+  public prefix = "!/";
   /** @private */
   private middlewares: MiddlewareFn[] = [];
   /** @private */
