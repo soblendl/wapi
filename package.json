@@ -1,7 +1,7 @@
 {
   "name": "@imjxsx/wapi",
   "version": "1.3.2",
-  "description": "Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript.",
+  "description": "Framework for developing WhatsApp bots powered by Baileys, written 100% in TypeScript.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,14 +13,14 @@
     }
   },
   "files": [
-    "./dist",
-    "./README.md"
+    "dist",
+    "README.md"
   ],
   "scripts": {
-    "dev": "node ./example/index",
-    "build": "pnpm run build:types && pnpm run build:js",
+    "dev": "node ./example/index.js",
+    "build": "npm run build:types && npm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "esbuild './src/**/*.ts' --outbase=src --outdir=dist --format=esm --platform=node --target=es2022 --sourcemap --minify --packages=external",
+    "build:js": "esbuild \"src/**/*.ts\" --outbase=src --outdir=dist --format=esm --platform=node --target=node20 --sourcemap",
     "prepare": "npm run build"
   },
   "keywords": [
@@ -33,30 +33,29 @@
   "author": "imjxsx",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imjxsx/wapi.git"
+    "url": "https://github.com/imjxsx/wapi.git"
   },
   "bugs": {
     "url": "https://github.com/imjxsx/wapi/issues"
   },
   "homepage": "https://github.com/imjxsx/wapi#readme",
-  "packageManager": "pnpm@10.20.0",
   "dependencies": {
-    "@hapi/boom": "10.0.1",
-    "@imjxsx/logger": "1.1.1",
-    "autolinker": "4.1.5",
-    "baileys": "npm:wileys@0.4.2",
-    "cheerio": "1.1.2",
-    "long": "5.3.2"
+    "@hapi/boom": "^10.0.1",
+    "@imjxsx/logger": "^1.1.1",
+    "autolinker": "^4.1.5",
+    "baileys": "^7.0.0-rc.9",
+    "cheerio": "^1.1.2",
+    "long": "^5.3.2"
   },
   "devDependencies": {
-    "@types/node": "20.19.5",
-    "@types/qrcode": "1.5.6",
-    "esbuild": "0.27.0",
-    "ioredis": "5.8.2",
-    "mongodb": "7.0.0",
-    "qrcode": "1.5.4",
-    "tsx": "4.20.6",
-    "typescript": "5.9.3"
+    "@types/node": "^20.19.5",
+    "@types/qrcode": "^1.5.6",
+    "esbuild": "^0.27.0",
+    "ioredis": "^5.8.2",
+    "mongodb": "^7.0.0",
+    "qrcode": "^1.5.4",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.0.0"
