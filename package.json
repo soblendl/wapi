@@ -21,7 +21,7 @@
     "build": "pnpm run build:types && pnpm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "esbuild './src/**/*.ts' --outbase=src --outdir=dist --format=esm --platform=node --target=es2022 --sourcemap --minify --packages=external",
-    "prepare": "pnpm run build"
+    "prepare": "npm run build"
   },
   "keywords": [
     "bot",
