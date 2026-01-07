@@ -1,4 +1,4 @@
-import { downloadMediaMessage, type WAMediaUpload, type WAMessage } from "baileys";
+import { downloadMediaMessage, type WAMediaUpload, type WAMessage } from "wileys";
 import type { IReplyOptions, IReplyWithAudioOptions, IReplyWithImageOptions, IReplyWithVideoOptions } from "../../types/context.js";
 import { isBuffer, isLink, toString } from "../../utils/index.js";
 import { Message } from "./message.js";
