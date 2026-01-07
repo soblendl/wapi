@@ -1,6 +1,6 @@
 import { createHash, type UUID } from "node:crypto";
 import path from "node:path";
-import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
+import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "wileys";
 import type { IBotAuthInit } from "../../types/index.js";
 import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../../utils/index.js";
 import fs from "node:fs";
