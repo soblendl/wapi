@@ -3,7 +3,7 @@ import type { UUID } from "node:crypto";
 import EventEmitter from "node:events";
 import { Boom } from "@hapi/boom";
 import type { BotStatus, BotWASocket, IBotAccount, IBotAuth, IBotEventMap, IBotSendMessageOptions, MiddlewareFn } from "../types/index.js";
-import { BaileysEventMap, makeWASocket, type AnyMessageContent, type GroupMetadata, type JidServer } from "wileys";
+import { BaileysEventMap, makeWASocket, type AnyMessageContent, type GroupMetadata, type JidServer, type ConnectionState, type WAMessage, type MessageUpsertType, type Contact } from "wileys";
 import { Context } from "./context/context.js";
 import { decode, isGroup, isLid, isPn, normalize, toError } from "../utils/index.js";
 import os from "node:os";
@@ -57,13 +57,13 @@ export class Bot extends EventEmitter<IBotEventMap> {
         shouldSyncHistoryMessage: () => (false),
         generateHighQualityLinkPreview: true,
         linkPreviewImageThumbnailWidth: 1_980,
-        shouldIgnoreJid: (jid) => {
+        shouldIgnoreJid: (jid: string) => {
           if (!isGroup(jid) && !isPn(jid) && !isLid(jid)) {
             return true;
           }
           return false;
         },
-        cachedGroupMetadata: async (jid) => {
+        cachedGroupMetadata: async (jid: string) => {
           return groups.get(jid);
         },
         version: [2, 3_000, 1_027_934_701],
@@ -76,7 +76,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("connection.update", async (update) => {
+      this.ws.ev.on("connection.update", async (update: Partial<ConnectionState>) => {
         try {
           if (update.qr) {
             if (method === "otp") {
@@ -155,7 +155,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("messages.upsert", async (upsert) => {
+      this.ws.ev.on("messages.upsert", async (upsert: { messages: WAMessage[]; type: MessageUpsertType }) => {
         try {
           if (upsert.type !== "notify" || !upsert.messages.length) {
             return;
@@ -200,7 +200,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("contacts.update", (updates) => {
+      this.ws.ev.on("contacts.update", (updates: Partial<Contact>[]) => {
         try {
           for (const update of updates) {
             if (!isLid(update.id) || !contacts.has(update.id)) {
@@ -217,7 +217,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("groups.update", async (updates) => {
+      this.ws.ev.on("groups.update", async (updates: Partial<GroupMetadata>[]) => {
         try {
           for (const update of updates) {
             if (!isGroup(update.id)) {

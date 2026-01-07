@@ -87,8 +87,8 @@ export class RedisAuth {
           if (!data[type]) {
             continue;
           }
-          for (const id of Object.keys(data[type])) {
-            const value = data[type][id];
+          for (const id of Object.keys(data[type]!)) {
+            const value = data[type]![id];
             const task = value ? this.set(`${type}-${id}`, value) : this.del(`${type}-${id}`);
             tasks.push(task);
           }
@@ -97,7 +97,7 @@ export class RedisAuth {
       },
     };
     return {
-      creds: this.creds,
+      creds: this.creds!,
       keys,
     };
   }

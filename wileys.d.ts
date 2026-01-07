@@ -6,8 +6,17 @@ declare module 'wileys' {
   import { proto as WAProto } from './WAProto';
 
   export { WAProto };
+  export { WAProto as proto };
+  export type JidServer = 's.whatsapp.net' | 'g.us' | 'broadcast' | 'call' | 'lid';
 
-  // Types from Auth.ts
+  export function initAuthCreds(): AuthenticationCreds;
+  export function makeWASocket(config: Partial<SocketConfig>): any;
+  export function downloadMediaMessage(
+    message: WAMessage,
+    type: 'buffer' | 'stream',
+    options: {},
+    ctx?: any
+  ): Promise<Buffer | any>;
   export type KeyPair = { public: Uint8Array; private: Uint8Array };
   export type SignedKeyPair = {
     keyPair: KeyPair;
@@ -98,8 +107,6 @@ declare module 'wileys' {
     creds: AuthenticationCreds;
     keys: SignalKeyStore;
   };
-
-  // Types from GroupMetadata.ts
   export type GroupParticipant = Contact & {
     isAdmin?: boolean;
     isSuperAdmin?: boolean;
@@ -148,8 +155,6 @@ declare module 'wileys' {
     status: number;
     participants?: { [key: string]: {} };
   }
-
-  // Types from Chat.ts
   export type WAPrivacyValue = 'all' | 'contacts' | 'contact_blacklist' | 'none';
   export type WAPrivacyOnlineValue = 'all' | 'match_last_seen';
   export type WAPrivacyGroupAddValue = 'all' | 'contacts' | 'contact_blacklist';
@@ -198,12 +203,12 @@ declare module 'wileys' {
     | { delete: true; lastMessages: LastMessageList }
     | { contact: WAProto.SyncActionValue.IContactAction | null }
     | { disableLinkPreviews: WAProto.SyncActionValue.IPrivacySettingDisableLinkPreviewsAction }
-    | { addLabel: any } // LabelActionBody
-    | { addChatLabel: any } // ChatLabelAssociationActionBody
-    | { removeChatLabel: any } // ChatLabelAssociationActionBody
-    | { addMessageLabel: any } // MessageLabelAssociationActionBody
-    | { removeMessageLabel: any } // MessageLabelAssociationActionBody
-    | { quickReply: any }; // QuickReplyAction
+    | { addLabel: any }
+    | { addChatLabel: any }
+    | { removeChatLabel: any }
+    | { addMessageLabel: any }
+    | { removeMessageLabel: any }
+    | { quickReply: any };
   export type InitialReceivedChatsState = {
     [jid: string]: {
       lastMsgRecvTimestamp?: number;
@@ -213,8 +218,6 @@ declare module 'wileys' {
   export type InitialAppStateSyncOptions = {
     accountSettings: AccountSettings;
   };
-
-  // Types from Contact.ts
   export interface Contact {
     id: string;
     lid?: string;
@@ -225,8 +228,6 @@ declare module 'wileys' {
     imgUrl?: string | null;
     status?: string;
   }
-
-  // Types from State.ts
   export type WAConnectionState = 'open' | 'connecting' | 'close';
   export type ConnectionState = {
     connection: WAConnectionState;
@@ -243,8 +244,6 @@ declare module 'wileys' {
     };
     isOnline?: boolean;
   };
-
-  // Types from Message.ts
   export type WAMessage = WAProto.IWebMessageInfo & {
     key: WAMessageKey;
     messageStubParameters?: any;
@@ -368,7 +367,7 @@ declare module 'wileys' {
   export type MessageRelayOptions = MinimalRelayOptions & {
     participant?: { jid: string; count: number };
     additionalAttributes?: { [_: string]: string };
-    additionalNodes?: any[]; // BinaryNode
+    additionalNodes?: any[];
     useUserDevicesCache?: boolean;
     statusJidList?: string[];
   };
@@ -385,11 +384,11 @@ declare module 'wileys' {
   export type MessageGenerationOptionsFromContent = MiscMessageGenerationOptions & { userJid: string };
   export type WAMediaUploadFunction = (
     encFilePath: string,
-    opts: { fileEncSha256B64: string; mediaType: any; timeoutMs?: number } // MediaType
+    opts: { fileEncSha256B64: string; mediaType: any; timeoutMs?: number }
   ) => Promise<{ mediaUrl: string; directPath: string; meta_hmac?: string; ts?: number; fbid?: number }>;
   export type MediaGenerationOptions = {
-    logger?: any; // ILogger
-    mediaTypeOverride?: any; // MediaType
+    logger?: any;
+    mediaTypeOverride?: any;
     upload: WAMediaUploadFunction;
     mediaCache?: CacheStore;
     mediaUploadTimeoutMs?: number;
@@ -411,8 +410,6 @@ declare module 'wileys' {
   export type MessageUserReceiptUpdate = { key: WAMessageKey; receipt: MessageUserReceipt };
   export type MediaDecryptionKeyInfo = { iv: Buffer; cipherKey: Buffer; macKey?: Buffer };
   export type MinimalMessage = Pick<WAMessage, 'key' | 'messageTimestamp'>;
-
-  // Types from Socket.ts
   export type WAVersion = [number, number, number];
   export type WABrowserDescription = [string, string, string];
   export type CacheStore = {
@@ -427,7 +424,7 @@ declare module 'wileys' {
     defaultQueryTimeoutMs: number | undefined;
     keepAliveIntervalMs: number;
     agent?: Agent;
-    logger: any; // ILogger
+    logger: any;
     version: WAVersion;
     browser: WABrowserDescription;
     fetchAgent?: Agent;
@@ -459,8 +456,6 @@ declare module 'wileys' {
     getMessage: (key: WAMessageKey) => Promise<WAProto.IMessage | undefined>;
     cachedGroupMetadata: (jid: string) => Promise<GroupMetadata | undefined>;
   };
-
-  // Types from Events.ts
   export type BaileysEventMap = {
     'connection.update': Partial<ConnectionState>;
     'creds.update': Partial<AuthenticationCreds>;

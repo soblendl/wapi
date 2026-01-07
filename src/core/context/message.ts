@@ -1,4 +1,4 @@
-import { proto, type WAMessage } from "baileys";
+import { proto, type WAMessage } from "wileys";
 import type { IChat, IFrom } from "../../types/index.js";
 import Long from "long";
 import type { Bot } from "../bot.js";
