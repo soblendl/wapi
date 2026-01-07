@@ -43,7 +43,7 @@
     "@hapi/boom": "^10.0.1",
     "@imjxsx/logger": "^1.1.1",
     "autolinker": "^4.1.5",
-    "baileys": "^7.0.0-rc.9",
+    "wileys": "npm:wileys@latest",
     "cheerio": "^1.1.2",
     "long": "^5.3.2"
   },
