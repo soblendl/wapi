@@ -1,4 +1,4 @@
-import { proto } from "baileys";
+import { proto } from "wileys";
 
 export interface IReplyOptions {
   mentions?: string[];
