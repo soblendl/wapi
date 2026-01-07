@@ -1,5 +1,5 @@
 import { createHash, type UUID } from "node:crypto";
-import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
+import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "wileys";
 import type { Redis } from "ioredis";
 import { type IBotAuthInit } from "../../types/index.js";
 import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../../utils/index.js";
