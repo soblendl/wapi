@@ -1,4 +1,4 @@
-import type { MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "baileys";
+import type { MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "wileys";
 import type { Context } from "../core/context/context.js";
 
 export interface IBotEventMap {
