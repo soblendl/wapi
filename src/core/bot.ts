@@ -3,7 +3,7 @@ import type { UUID } from "node:crypto";
 import EventEmitter from "node:events";
 import { Boom } from "@hapi/boom";
 import type { BotStatus, BotWASocket, IBotAccount, IBotAuth, IBotEventMap, IBotSendMessageOptions, MiddlewareFn } from "../types/index.js";
-import { BaileysEventMap, makeWASocket, type AnyMessageContent, type GroupMetadata, type JidServer } from "baileys";
+import { BaileysEventMap, makeWASocket, type AnyMessageContent, type GroupMetadata, type JidServer } from "wileys";
 import { Context } from "./context/context.js";
 import { decode, isGroup, isLid, isPn, normalize, toError } from "../utils/index.js";
 import os from "node:os";
