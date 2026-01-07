@@ -17,6 +17,8 @@
   },
   "include": [
     "./src",
+    "wileys.d.ts",
+    "WAProto.d.ts"
   ],
   "exclude": [
     "./node_modules",
