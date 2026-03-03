@@ -1,4 +1,4 @@
-import type { MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "wileys";
+import type { MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "baileys";
 import type { Context } from "../core/context/context.js";
 
 export interface IBotEventMap {
@@ -29,4 +29,5 @@ export type NextFn = () => Promise<void>;
 export type MiddlewareFn = (ctx: Context, next: NextFn) => Promise<void>;
 export interface IBotSendMessageOptions extends MiscMessageGenerationOptions {
   addressing?: "pn" | "lid";
+  quoted?: any;
 }

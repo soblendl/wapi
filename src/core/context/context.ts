@@ -1,4 +1,4 @@
-import { downloadMediaMessage, type WAMediaUpload, type WAMessage } from "wileys";
+import { downloadMediaMessage, type WAMediaUpload, type WAMessage } from "baileys";
 import type { IReplyOptions, IReplyWithAudioOptions, IReplyWithImageOptions, IReplyWithVideoOptions } from "../../types/context.js";
 import { isBuffer, isLink, toString } from "../../utils/index.js";
 import { Message } from "./message.js";
@@ -13,12 +13,13 @@ export class Context extends Message {
     super(bot, message);
     this.bot = bot;
     if (this.text) {
-      const regexp = new RegExp(`^\\s*([${this.bot.prefix}])\\s*([a-zA-Z0-9_$>?-]+)(?:\\s+(.+))?`, "i");
-      const match = (this.text.match(regexp) ?? []).filter(Boolean).map((v) => (v.trim()));
-      if (match.length) {
+      const prefix = this.bot.prefix.split("").map(char => `\\${char}`).join("|");
+      const regexp = new RegExp(`^\\s*(${prefix})\\s*([a-zA-Z0-9_$>?-]+)(?:\\s+([\\s\\S]*))?$`, "i");
+      const match = this.text.match(regexp);
+      if (match) {
         this.prefixUsed = match[1] ?? "";
         this.commandName = (match[2] ?? "").toLowerCase();
-        this.args = (match[3] ?? "").split(/\s+/).filter(Boolean).map((v) => (v.trim()));
+        this.args = (match[3] ?? "").trim().split(/\s+/).filter(Boolean);
       }
     }
   }

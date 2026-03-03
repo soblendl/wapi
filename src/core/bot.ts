@@ -2,10 +2,31 @@ import Logger from "@imjxsx/logger";
 import type { UUID } from "node:crypto";
 import EventEmitter from "node:events";
 import { Boom } from "@hapi/boom";
-import type { BotStatus, BotWASocket, IBotAccount, IBotAuth, IBotEventMap, IBotSendMessageOptions, MiddlewareFn } from "../types/index.js";
-import { BaileysEventMap, makeWASocket, type AnyMessageContent, type GroupMetadata, type JidServer, type ConnectionState, type WAMessage, type MessageUpsertType, type Contact } from "wileys";
+import type {
+  BotStatus,
+  BotWASocket,
+  IBotAccount,
+  IBotAuth,
+  IBotEventMap,
+  IBotSendMessageOptions,
+  MiddlewareFn,
+} from "../types/index.js";
+import {
+  BaileysEventMap,
+  makeWASocket,
+  type AnyMessageContent,
+  type GroupMetadata,
+  type JidServer,
+} from "baileys";
 import { Context } from "./context/context.js";
-import { decode, isGroup, isLid, isPn, normalize, toError } from "../utils/index.js";
+import {
+  decode,
+  isGroup,
+  isLid,
+  isPn,
+  normalize,
+  toError,
+} from "../utils/index.js";
 import os from "node:os";
 import { contacts, groups } from "../cache/index.js";
 import { Autolinker } from "autolinker";
@@ -24,16 +45,23 @@ export class Bot extends EventEmitter<IBotEventMap> {
   private middlewares: MiddlewareFn[] = [];
   /** @private */
   private commands = new Map<string, MiddlewareFn[]>();
-  constructor(uuid: UUID, auth: IBotAuth, account: IBotAccount, logger?: Logger) {
+  constructor(
+    uuid: UUID,
+    auth: IBotAuth,
+    account: IBotAccount,
+    logger?: Logger,
+  ) {
     super();
     this.uuid = uuid;
     this.auth = auth;
     this.account = account;
-    this.logger = logger ?? new Logger({
-      name: `Bot ${this.uuid}`,
-      colorize: process.env["NODE_ENV"] !== "production",
-      level: process.env["NODE_ENV"] !== "production" ? "TRACE" : "INFO",
-    });
+    this.logger =
+      logger ??
+      new Logger({
+        name: `Bot ${this.uuid}`,
+        colorize: process.env["NODE_ENV"] !== "production",
+        level: process.env["NODE_ENV"] !== "production" ? "TRACE" : "INFO",
+      });
   }
   public use(...middlewares: MiddlewareFn[]): void {
     this.middlewares.push(...middlewares);
@@ -51,54 +79,69 @@ export class Bot extends EventEmitter<IBotEventMap> {
         auth,
         browser: [os.platform(), "Firefox", os.release()],
         logger: this.logger.child({ name: `WASocket ${this.uuid} ` }),
-        qrTimeout: 60_000,
+        qrTimeout: 30_000,
         markOnlineOnConnect: true,
         syncFullHistory: false,
-        shouldSyncHistoryMessage: () => (false),
+        shouldSyncHistoryMessage: () => false,
         generateHighQualityLinkPreview: true,
-        linkPreviewImageThumbnailWidth: 1_980,
-        shouldIgnoreJid: (jid: string) => {
+        shouldIgnoreJid: (jid) => {
           if (!isGroup(jid) && !isPn(jid) && !isLid(jid)) {
             return true;
           }
           return false;
         },
-        cachedGroupMetadata: async (jid: string) => {
+        cachedGroupMetadata: async (jid) => {
           return groups.get(jid);
         },
-        version: [2, 3_000, 1_027_934_701],
+        //TODO: Temporary solution
+        //https://github.com/WhiskeySockets/Baileys/issues/2370
+        version: [2, 3e3, 1_033_962_578],
       });
       this.ws.ev.on("creds.update", async () => {
         try {
           await this.auth.save();
-        }
-        catch (e) {
+        } catch (e) {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("connection.update", async (update: Partial<ConnectionState>) => {
+      this.ws.ev.on("connection.update", async (update) => {
         try {
           if (update.qr) {
             if (method === "otp") {
               if (!isPn(this.account.pn)) {
-                await this.disconnect(new Boom("The OTP code cannot be generated because a number was not provided.", { statusCode: 400 }));
+                await this.disconnect(
+                  new Boom(
+                    "The OTP code cannot be generated because a number was not provided.",
+                    { statusCode: 400 },
+                  ),
+                );
                 return;
               }
-              const otp = await this.ws?.requestPairingCode(decode(this.account.pn).jid);
+              const otp = await this.ws?.requestPairingCode(
+                decode(this.account.pn).jid,
+              );
               if (!otp) {
-                await this.disconnect(new Boom(`An OTP code could not be generated for '@${decode(this.account.pn).jid}'`, { statusCode: 400 }));
+                await this.disconnect(
+                  new Boom(
+                    `An OTP code could not be generated for '@${decode(this.account.pn).jid}'`,
+                    { statusCode: 400 },
+                  ),
+                );
                 return;
               }
               this.emit("otp", otp);
-            }
-            else {
+            } else {
               this.emit("qr", update.qr);
             }
           }
           if (update.connection === "close") {
-            this.ws?.ev.removeAllListeners(undefined as unknown as keyof BaileysEventMap);
+            //@ts-ignore
+            this.ws?.ev.removeAllListeners(undefined);
             const output = new Boom(update.lastDisconnect?.error).output;
-            this.emit("close", `${output.payload.error} ${output.payload.statusCode}: ${output.payload.message}`);
+            this.emit(
+              "close",
+              `${output.payload.error} ${output.payload.statusCode}: ${output.payload.message}`,
+            );
             switch (output.payload.statusCode) {
               case 400:
               case 401:
@@ -112,7 +155,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
                 break;
               }
               case 503: {
-                await new Promise((resolve) => (setTimeout(resolve, 30_000)));
+                await new Promise((resolve) => setTimeout(resolve, 30_000));
                 this.status = "reconnecting";
                 await this.login(method);
                 break;
@@ -123,25 +166,30 @@ export class Bot extends EventEmitter<IBotEventMap> {
                 break;
               }
               default: {
-                if (update.lastDisconnect?.error?.message === "Intentional disconnection.") {
+                if (
+                  update.lastDisconnect?.error?.message ===
+                  "Intentional disconnection."
+                ) {
                   this.ws = null;
                   this.removeAllListeners();
                   this.status = "close";
                   break;
                 }
-                await new Promise((resolve) => (setTimeout(resolve, 5_000)));
+                await new Promise((resolve) => setTimeout(resolve, 5_000));
                 this.status = "reconnecting";
                 await this.login(method);
               }
             }
             return;
-          }
-          else if (update.connection === "open") {
+          } else if (update.connection === "open") {
             const jid = normalize(this.ws?.user?.lid);
             const pn = normalize(this.ws?.user?.id);
-            const name = this.ws?.user?.verifiedName ?? this.ws?.user?.name ?? "";
+            const name =
+              this.ws?.user?.verifiedName ?? this.ws?.user?.name ?? "";
             if (!isPn(pn) || !isLid(jid)) {
-              await this.disconnect(new Boom("Restart required.", { statusCode: 515 }));
+              await this.disconnect(
+                new Boom("Restart required.", { statusCode: 515 }),
+              );
               return;
             }
             this.account = { jid, pn, name };
@@ -150,17 +198,27 @@ export class Bot extends EventEmitter<IBotEventMap> {
             this.emit("open", this.account);
             return;
           }
-        }
-        catch (e) {
+        } catch (e) {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("messages.upsert", async (upsert: { messages: WAMessage[]; type: MessageUpsertType }) => {
+      this.ws.ev.on("messages.upsert", async (upsert) => {
         try {
           if (upsert.type !== "notify" || !upsert.messages.length) {
             return;
           }
+          // Wait for the connection to be fully open if it's currently opening or reconnecting
+          while (this.status !== "open" && this.status !== "close") {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+          if (this.status === "close") {
+            return;
+          }
           for (const message of upsert.messages) {
+            // Skip messages from the bot itself
+            if (message.key.fromMe) {
+              continue;
+            }
             const ctx = new Context(this, message);
             if (isGroup(ctx.chat.jid)) {
               if (!groups.has(ctx.chat.jid)) {
@@ -171,7 +229,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
               }
             }
             if (isLid(ctx.from.jid) && isPn(ctx.from.pn)) {
-              contacts.set(ctx.from.jid, { jid: ctx.from.jid, pn: ctx.from.pn, name: ctx.from.name });
+              contacts.set(ctx.from.jid, {
+                jid: ctx.from.jid,
+                pn: ctx.from.pn,
+                name: ctx.from.name,
+              });
             }
             const middlewares = [
               ...this.middlewares,
@@ -195,12 +257,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
               await runner(0);
             }
           }
-        }
-        catch (e) {
+        } catch (e) {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("contacts.update", (updates: Partial<Contact>[]) => {
+      this.ws.ev.on("contacts.update", (updates) => {
         try {
           for (const update of updates) {
             if (!isLid(update.id) || !contacts.has(update.id)) {
@@ -212,12 +273,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
               contact.name = name;
             }
           }
-        }
-        catch (e) {
+        } catch (e) {
           this.emit("error", toError(e));
         }
       });
-      this.ws.ev.on("groups.update", async (updates: Partial<GroupMetadata>[]) => {
+      this.ws.ev.on("groups.update", async (updates) => {
         try {
           for (const update of updates) {
             if (!isGroup(update.id)) {
@@ -229,13 +289,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
               groups.set(update.id, metadata);
             }
           }
-        }
-        catch (e) {
+        } catch (e) {
           this.emit("error", toError(e));
         }
       });
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
     }
   }
@@ -243,16 +301,14 @@ export class Bot extends EventEmitter<IBotEventMap> {
     try {
       reason ??= new Error("Intentional disconnection.");
       this.ws?.end(reason);
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
     }
   }
   public async logout(reason?: Boom): Promise<void> {
     try {
       await this.ws?.logout(reason?.message);
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
     }
   }
@@ -266,8 +322,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
         mentions.add(`${match[1]}@${server}`);
       }
       return Array.from(mentions.values());
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
       return [];
     }
@@ -297,32 +352,49 @@ export class Bot extends EventEmitter<IBotEventMap> {
         links.add(link);
       });
       return Array.from(links.values());
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
       return [];
     }
   }
-  public async sendMessage(jid: string, content: AnyMessageContent, options?: IBotSendMessageOptions): Promise<Context | null> {
+  public async sendMessage(
+    jid: string,
+    content: AnyMessageContent,
+    options?: IBotSendMessageOptions,
+  ): Promise<Context | null> {
     try {
       if (!this.ws?.ws.isOpen) {
         throw new Error("The WASocket connection is not open.");
       }
       const before = performance.now();
-      const text = "text" in content && content.text ? content.text : "caption" in content && content.caption ? content.caption : "";
-      const mentions = this.parseMentions(text, options?.addressing === "lid" ? "lid" : "s.whatsapp.net");
-      const message = await this.ws.sendMessage(jid, {
-        ...content,
-        mentions: "mentions" in content && content.mentions ? content.mentions.concat(...mentions) : mentions,
-      }, options);
+      const text =
+        "text" in content && content.text
+          ? content.text
+          : "caption" in content && content.caption
+            ? content.caption
+            : "";
+      const mentions = this.parseMentions(
+        text,
+        options?.addressing === "lid" ? "lid" : "s.whatsapp.net",
+      );
+      const message = await this.ws.sendMessage(
+        jid,
+        {
+          ...content,
+          mentions:
+            "mentions" in content && content.mentions
+              ? content.mentions.concat(...mentions)
+              : mentions,
+        },
+        options,
+      );
       if (!message) {
         return null;
       }
       const after = performance.now();
       this.ping = after - before;
       return new Context(this, message);
-    }
-    catch (e) {
+    } catch (e) {
       this.emit("error", toError(e));
       return null;
     }
@@ -332,9 +404,8 @@ export class Bot extends EventEmitter<IBotEventMap> {
       if (!this.ws?.ws.isOpen) {
         throw new Error("The WASocket connection is not open.");
       }
-      return groups.get(jid) ?? await this.ws.groupMetadata(jid);
-    }
-    catch (e) {
+      return groups.get(jid) ?? (await this.ws.groupMetadata(jid));
+    } catch (e) {
       this.emit("error", toError(e));
       return null;
     }
@@ -344,9 +415,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
       if (!this.ws?.ws.isOpen) {
         throw new Error("The WASocket connection is not open.");
       }
-      return await this.ws.profilePictureUrl(jid, "image") ?? "https://i.pinimg.com/736x/62/01/0d/62010d848b790a2336d1542fcda51789.jpg";
-    }
-    catch (e) {
+      return (
+        (await this.ws.profilePictureUrl(jid, "image")) ??
+        "https://i.pinimg.com/736x/62/01/0d/62010d848b790a2336d1542fcda51789.jpg"
+      );
+    } catch (e) {
       this.emit("error", toError(e));
       return "https://i.pinimg.com/736x/62/01/0d/62010d848b790a2336d1542fcda51789.jpg";
     }

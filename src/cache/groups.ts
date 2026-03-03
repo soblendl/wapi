@@ -1,3 +1,3 @@
-import type { GroupMetadata } from "wileys";
+import type { GroupMetadata } from "baileys";
 
 export const groups = new Map<string, GroupMetadata>();

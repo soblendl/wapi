@@ -1,5 +1,5 @@
 import { createHash, type UUID } from "node:crypto";
-import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "wileys";
+import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
 import type { Redis } from "ioredis";
 import { type IBotAuthInit } from "../../types/index.js";
 import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../../utils/index.js";
@@ -87,8 +87,8 @@ export class RedisAuth {
           if (!data[type]) {
             continue;
           }
-          for (const id of Object.keys(data[type]!)) {
-            const value = data[type]![id];
+          for (const id of Object.keys(data[type])) {
+            const value = data[type][id];
             const task = value ? this.set(`${type}-${id}`, value) : this.del(`${type}-${id}`);
             tasks.push(task);
           }
@@ -97,7 +97,7 @@ export class RedisAuth {
       },
     };
     return {
-      creds: this.creds!,
+      creds: this.creds,
       keys,
     };
   }
